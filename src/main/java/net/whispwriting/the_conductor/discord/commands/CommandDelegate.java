@@ -21,7 +21,12 @@ public class CommandDelegate {
                 Commands.slash("announcer", "link an input channel to an announcement channel.")
                         .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
                         .addOption(OptionType.CHANNEL, "input", "input channel")
-                        .addOption(OptionType.CHANNEL, "output", "output channel")
+                        .addOption(OptionType.CHANNEL, "output", "output channel"),
+                Commands.slash("apply", "Apply to be a DJ")
+                        .addOption(OptionType.STRING, "name", "Your DJ stage name")
+                        .addOption(OptionType.ATTACHMENT, "logo", "Your DJ Logo")
+                        .addOption(OptionType.STRING, "genre", "Your genre")
+                        .addOption(OptionType.STRING, "demo", "Link to your demo set")
         ).queue();
 
         bot.registerCommand("conductor", new TestCommand());

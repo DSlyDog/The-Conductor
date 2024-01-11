@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Profile {
@@ -11,21 +12,23 @@ public class Profile {
     private String discordID;
     private String name;
     private String logo;
-    private List<String> genres;
-    private List<String> socials;
-    private List<String> demoSets;
+    private List<String> genres = new ArrayList<>();
+    private List<String> socials = new ArrayList<>();
+    private List<String> demoSets = new ArrayList<>();
 
     private JsonFile file;
 
 
-    public Profile(String discordID, String name, String logo, JsonFile file){
+    private Profile(String discordID, String name, String logo, String genre, String demo, JsonFile file){
         this.discordID = discordID;
         this.name = name;
         this.logo = logo;
         this.file = file;
+        genres.add(genre);
+        demoSets.add(demo);
     }
 
-    public Profile(String discordID, String name, String logo, List<String> genres, List<String> socials, List<String> demoSets){
+    private Profile(String discordID, String name, String logo, List<String> genres, List<String> socials, List<String> demoSets){
         this.discordID = discordID;
         this.name = name;
         this.logo = logo;
@@ -87,6 +90,23 @@ public class Profile {
         }
     }
 
+    public boolean newSave(){
+        file.set("name", name);
+        file.set("logo", logo);
+        file.set("genres", genres);
+        file.set("socials", socials);
+        file.set("demoSets", demoSets);
+
+        try {
+            file.save();
+            return true;
+        } catch (IOException e) {
+            System.err.println("Failed to save DJ Profile file");
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public MessageEmbed getProfileEmbed(){
         EmbedBuilder builder = new EmbedBuilder();
 
@@ -117,10 +137,10 @@ public class Profile {
         return stringBuilder.toString().length() > 0 ? stringBuilder.toString() : "There are no %s listed.";
     }
 
-    public static Profile buildFromApplication(String discordID, String name, String logo){
+    public static Profile buildFromApplication(String discordID, String name, String logo, String genre, String demo){
         JsonFile file = new JsonFile(discordID, "dj_profiles");
 
-        return new Profile(discordID, name, logo, file);
+        return new Profile(discordID, name, logo, genre, demo, file);
     }
 
     public static Profile loadFromFile(String discordID){
