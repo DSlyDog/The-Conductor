@@ -1,6 +1,7 @@
 package net.whispwriting.the_conductor.discord.commands.command;
 
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -27,11 +28,15 @@ public class OpenDJApplications implements Command {
             return;
         }
 
+        if (!Conductor.getInstance().getApplicationMessageID().equals("")){
+            Conductor.getInstance().getJDA().getGuilds().get(0).getTextChannelById(Strings.DJ_APPLICATION_CHANNEL).retrieveMessageById(Conductor.getInstance().getApplicationMessageID()).complete().delete().queue();
+        }
         Button apply = Button.of(ButtonStyle.SUCCESS, "apply", "Apply");
         MessageCreateBuilder builder = new MessageCreateBuilder();
         builder.addContent("Greetings! \n\nDJ applications are open! Click the \"Apply\" button below to apply.");
         builder.addActionRow(apply);
-        Conductor.getInstance().sendMessage(builder.build(), channel, 1000);
+        Message message = Conductor.getInstance().sendMessageWithReturn(builder.build(), channel, 1000);
+        Conductor.getInstance().setApplicationMessageID(message.getId());
         event.reply("Success!").setEphemeral(true).queue();
     }
 }

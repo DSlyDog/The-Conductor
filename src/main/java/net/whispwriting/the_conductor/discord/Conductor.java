@@ -3,10 +3,7 @@ package net.whispwriting.the_conductor.discord;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -43,6 +40,8 @@ public class Conductor {
     private static Map<String, Profile> applications = new HashMap<>();
     private Map<String, Profile> profiles = new HashMap<>();
     private String avatar;
+
+    private String applicationMessageID = "";
 
     public enum SearchType{
         NAME,
@@ -135,6 +134,29 @@ public class Conductor {
             e.printStackTrace();
         }
     }
+
+    public Message sendMessageWithReturn(String message, TextChannel channel, long delay){
+        channel.sendTyping().queue();
+        try{
+            Thread.sleep(delay);
+            return channel.sendMessage(message).complete();
+        }catch (InterruptedException e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Message sendMessageWithReturn(MessageCreateData message, TextChannel channel, long delay){
+        channel.sendTyping().queue();
+        try{
+            Thread.sleep(delay);
+            return channel.sendMessage(message).complete();
+        }catch (InterruptedException e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public Channel getChannel(String key, SearchType type){
         switch (type){
             case NAME:
@@ -186,6 +208,14 @@ public class Conductor {
     }
     public List<TextChannel> getChannels(){
         return jda.getTextChannels();
+    }
+
+    public void setApplicationMessageID(String applicationMessageID){
+        this.applicationMessageID = applicationMessageID;
+    }
+
+    public String getApplicationMessageID(){
+        return this.applicationMessageID;
     }
 
     public void stop(){
