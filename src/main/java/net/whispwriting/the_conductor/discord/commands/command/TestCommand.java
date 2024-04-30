@@ -19,7 +19,7 @@ public class TestCommand implements Command {
     @Override
     public void onCommand(SlashCommandInteractionEvent event, User sender, String label, List<OptionMapping> args, TextChannel channel) {
         for (OptionMapping option : args){
-            Conductor.getInstance().sendMessage(option.getAsString(), channel);
+            Conductor.getInstance().sendMessage(option.getAsString(), channel, 100);
         }
 
         event.reply("This is a response!").setEphemeral(true).queue();

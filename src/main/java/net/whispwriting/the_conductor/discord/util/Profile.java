@@ -2,7 +2,9 @@ package net.whispwriting.the_conductor.discord.util;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.whispwriting.the_conductor.discord.Conductor;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +13,8 @@ public class Profile {
 
     private String discordID;
     private String name;
+
+    private String vrcName;
     private String logo;
     private List<String> genres = new ArrayList<>();
     private List<String> socials = new ArrayList<>();
@@ -19,22 +23,25 @@ public class Profile {
     private JsonFile file;
 
 
-    private Profile(String discordID, String name, String logo, String genre, String demo, JsonFile file){
+    private Profile(String discordID, String vrcName, String name, String logo, String genre, String demo, JsonFile file){
         this.discordID = discordID;
         this.name = name;
+        this.vrcName = vrcName;
         this.logo = logo;
         this.file = file;
         genres.add(genre);
         demoSets.add(demo);
     }
 
-    private Profile(String discordID, String name, String logo, List<String> genres, List<String> socials, List<String> demoSets){
+    private Profile(String discordID, String vrcName, String name, String logo, List<String> genres, List<String> socials, List<String> demoSets, JsonFile file){
         this.discordID = discordID;
         this.name = name;
+        this.vrcName = vrcName;
         this.logo = logo;
         this.genres = genres;
         this.socials = socials;
         this.demoSets = demoSets;
+        this.file = file;
     }
 
     public boolean updateName(String name){
@@ -110,21 +117,28 @@ public class Profile {
     public MessageEmbed getProfileEmbed(){
         EmbedBuilder builder = new EmbedBuilder();
 
-        builder.addField("DJ Name", name, true);
+        builder.setColor(Color.yellow);
+
+        builder.addField("DJ Name", name, false);
+
+        builder.addField("Discord Name", Conductor.getInstance().getJDA().getUserById(discordID).getEffectiveName(), false);
+
+        builder.addField("VRChat Name", vrcName, false);
 
         String genreString = listFieldBuilder(genres);
         genreString = String.format(genreString, "genres");
-        builder.addField("Genres", genreString, true);
+        builder.addField("Genres", genreString, false);
 
         String socialsString = listFieldBuilder(socials);
         socialsString = String.format(socialsString, "socials");
-        builder.addField("Socials", socialsString, true);
+        builder.addField("Socials", socialsString, false);
 
         String demoSetString = listFieldBuilder(demoSets);
         demoSetString = String.format(demoSetString, "demo sets");
-        builder.addField("Demo Sets", demoSetString, true);
+        builder.addField("Demo Sets", demoSetString, false);
 
-        builder.setThumbnail(logo);
+        if (logo.length() > 0)
+            builder.setThumbnail(logo);
 
         return builder.build();
     }
@@ -134,23 +148,30 @@ public class Profile {
         for (String item : lst){
             stringBuilder.append(item).append(", ");
         }
-        return stringBuilder.toString().length() > 0 ? stringBuilder.toString() : "There are no %s listed.";
+        return stringBuilder.toString().length() > 0 ? stringBuilder.toString().substring(0, stringBuilder.toString().length()-2) : "There are no %s listed.";
     }
 
-    public static Profile buildFromApplication(String discordID, String name, String logo, String genre, String demo){
+    public static Profile buildFromApplication(String discordID, String vrcName, String name, String logo, String genre, String demo){
         JsonFile file = new JsonFile(discordID, "dj_profiles");
 
-        return new Profile(discordID, name, logo, genre, demo, file);
+        return new Profile(discordID, vrcName, name, logo, genre, demo, file);
+    }
+
+    public static Profile buildFromApplication(String discordID, String vrcName, String name, String logo, List<String> genres, List<String> socials, List<String> demoSets){
+        JsonFile file = new JsonFile(discordID, "dj_profiles");
+
+        return new Profile(discordID, vrcName, name, logo, genres, socials, demoSets, file);
     }
 
     public static Profile loadFromFile(String discordID){
         JsonFile file = new JsonFile(discordID, "dj_profiles");
         String name = file.getString("name");
+        String vrcName = file.getString("vrcName");
         String logo = file.getString("logo");
         List<String> genres = file.getStringList("genres");
         List<String> socials = file.getStringList("socials");
         List<String> demoSets = file.getStringList("demoSets");
 
-        return new Profile(discordID, name, logo, genres, socials, demoSets);
+        return new Profile(discordID, vrcName, name, logo, genres, socials, demoSets, file);
     }
 }

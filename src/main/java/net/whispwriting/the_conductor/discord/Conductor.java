@@ -22,6 +22,7 @@ import net.dv8tion.jda.api.utils.messages.MessageData;
 import net.whispwriting.the_conductor.Main;
 import net.whispwriting.the_conductor.discord.commands.Command;
 import net.whispwriting.the_conductor.discord.commands.CommandHandler;
+import net.whispwriting.the_conductor.discord.events.ApplyButton;
 import net.whispwriting.the_conductor.discord.events.ButtonPress;
 import net.whispwriting.the_conductor.discord.events.MessageEvent;
 import net.whispwriting.the_conductor.discord.util.JsonFile;
@@ -42,6 +43,11 @@ public class Conductor {
     private static Map<String, Profile> applications = new HashMap<>();
     private Map<String, Profile> profiles = new HashMap<>();
     private String avatar;
+
+    public enum SearchType{
+        NAME,
+        ID
+    }
     private static Conductor instance;
     private Conductor(){}
         public void init(String token) throws LoginException {
@@ -73,6 +79,7 @@ public class Conductor {
         jda.addEventListener(handler);
         jda.addEventListener(new MessageEvent());
         jda.addEventListener(new ButtonPress());
+        jda.addEventListener((new ApplyButton()));
         avatar = jda.getSelfUser().getAvatarUrl();
     }
 
@@ -82,7 +89,7 @@ public class Conductor {
             for (Channel channel : guild.getChannels()) {
                 String id = announcers.getString(channel.getId());
                 if (id != null) {
-                    Channel output = getChannel(id);
+                    Channel output = getChannel(id, SearchType.ID);
                     if (output.getType() == ChannelType.TEXT) {
                         announcerChannels.put((TextChannel) channel, (TextChannel) output);
                     }
@@ -109,40 +116,73 @@ public class Conductor {
     public void registerCommand(String label, Command command){
         handler.registerCommand(label, command);
     }
-    public void sendMessage(String message, TextChannel channel){
+    public void sendMessage(String message, TextChannel channel, long delay){
         channel.sendTyping().queue();
         try{
-            Thread.sleep(100);
+            Thread.sleep(delay);
             channel.sendMessage(message).queue();
         }catch (InterruptedException e){
             e.printStackTrace();
         }
     }
 
-    public void sendMessage(MessageCreateData message, TextChannel channel){
+    public void sendMessage(MessageCreateData message, TextChannel channel, long delay){
         channel.sendTyping().queue();
         try{
-            Thread.sleep(100);
+            Thread.sleep(delay);
             channel.sendMessage(message).queue();
         }catch (InterruptedException e){
             e.printStackTrace();
         }
     }
-    public Channel getChannel(String id){
+    public Channel getChannel(String key, SearchType type){
+        switch (type){
+            case NAME:
+                return getChannelByName(key);
+            case ID:
+                return getChannelByID(key);
+            default:
+                return null;
+        }
+    }
+
+    private Channel getChannelByID(String id){
         Guild guild = jda.getGuilds().get(0);
         try {
-            return guild.getChannelById(Channel.class, id);
+            return guild.getChannelById(TextChannel.class, id);
         }catch(IndexOutOfBoundsException e){
             return null;
         }
     }
-    public Role getRole(String name) {
+
+    private Channel getChannelByName(String name){
+        Guild guild = jda.getGuilds().get(0);
+        return guild.getTextChannelsByName(name, true).get(0);
+    }
+
+    public Role getRole(String key, SearchType type) {
+        switch (type){
+            case NAME:
+                return getRoleByName(key);
+            case ID:
+                return getRoleByID(key);
+            default:
+                return null;
+        }
+    }
+
+    private Role getRoleByName(String name){
         Guild guild = jda.getGuilds().get(0);
         try {
             return guild.getRolesByName(name, true).get(0);
         } catch (IndexOutOfBoundsException e) {
             return null;
         }
+    }
+
+    private Role getRoleByID(String id){
+        Guild guild = jda.getGuilds().get(0);
+        return guild.getRoleById(id);
     }
     public List<TextChannel> getChannels(){
         return jda.getTextChannels();
@@ -151,14 +191,14 @@ public class Conductor {
     public void stop(){
         jda.shutdown();
     }
-    public static Conductor getInstance(){
+    public static Conductor getInstance() {
         if (instance == null)
             instance = new Conductor();
         return instance;
     }
 
     public class ApplicationManager {
-        private static final TextChannel APPLICATION_CHANNEL = Conductor.getInstance().jda.getTextChannelById("725539958399565885");
+        private static final TextChannel APPLICATION_CHANNEL = Conductor.getInstance().jda.getTextChannelById("1194827653279141938");
         public static boolean addApplication(Profile profile, String discordID){
             if (applications.containsKey(discordID))
                 return false;
@@ -172,14 +212,10 @@ public class Conductor {
             Button deny = Button.of(ButtonStyle.DANGER, "app_deny+" + applicant.getId(), "Reject");
 
             MessageCreateBuilder builder = new MessageCreateBuilder()
-                    .addEmbeds(new EmbedBuilder()
-                            .setColor(Color.CYAN)
-                            .setTitle("This is a message with a button!")
-                            .setDescription("Please click a button")
-                            .build())
-                    .addActionRow(accept, deny);
+                    .addEmbeds(profile.getProfileEmbed())
+                            .addActionRow(accept, deny);
 
-            Conductor.getInstance().sendMessage(builder.build(), Conductor.getInstance().getChannels().get(0));
+            Conductor.getInstance().sendMessage(builder.build(), APPLICATION_CHANNEL, 1000);
         }
 
         public static boolean acceptApplication(String discordID){

@@ -6,14 +6,16 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.whispwriting.the_conductor.Main;
 import net.whispwriting.the_conductor.discord.Conductor;
+import net.whispwriting.the_conductor.discord.commands.command.Apply;
 import net.whispwriting.the_conductor.discord.commands.command.CreateAnnouncerChannel;
+import net.whispwriting.the_conductor.discord.commands.command.OpenDJApplications;
 import net.whispwriting.the_conductor.discord.commands.command.TestCommand;
 
 public class CommandDelegate {
 
     public static void registerCommands(Conductor bot){
         Main.getLogger().info("Initializing commands...");
-        bot.getJDA().updateCommands().addCommands(
+        bot.getJDA().getGuilds().get(0).updateCommands().addCommands(
                 Commands.slash("conductor", "test the conductor bot")
                         .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
                         .addOption(OptionType.STRING, "op1", "op1")
@@ -23,14 +25,19 @@ public class CommandDelegate {
                         .addOption(OptionType.CHANNEL, "input", "input channel")
                         .addOption(OptionType.CHANNEL, "output", "output channel"),
                 Commands.slash("apply", "Apply to be a DJ")
-                        .addOption(OptionType.STRING, "name", "Your DJ stage name")
+                        .addOption(OptionType.STRING, "dj_name", "Your DJ stage name")
+                        .addOption(OptionType.STRING, "vrc_name", "Your name on VRChat")
                         .addOption(OptionType.ATTACHMENT, "logo", "Your DJ Logo")
                         .addOption(OptionType.STRING, "genre", "Your genre")
-                        .addOption(OptionType.STRING, "demo", "Link to your demo set")
+                        .addOption(OptionType.STRING, "demo", "Link to your demo set"),
+                Commands.slash("open_dj_apps", "Open DJ applications"),
+                Commands.slash("close_dj_apps", "Close DJ Applications")
         ).queue();
 
         bot.registerCommand("conductor", new TestCommand());
         bot.registerCommand("announcer", new CreateAnnouncerChannel());
+        bot.registerCommand("apply", new Apply());
+        bot.registerCommand("open_dj_apps", new OpenDJApplications());
         Main.getLogger().info("Commands initialized");
     }
 }

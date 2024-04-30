@@ -31,7 +31,7 @@ public class Main {
             return;
         }
 
-        CommandDelegate.registerCommands(bot);
+        registerCommandsAsync(bot);
 
         listen(bot);
     }
@@ -59,6 +59,21 @@ public class Main {
                 LOGGER.info("Command not found");
                 break;
         }
+    }
+
+    public static void registerCommandsAsync(Conductor bot){
+        Thread cmdRegisterThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(5000);
+                    CommandDelegate.registerCommands(bot);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        cmdRegisterThread.start();
     }
 
     public static Logger getLogger(){
