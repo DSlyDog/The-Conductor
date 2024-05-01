@@ -50,10 +50,28 @@ public class Profile {
         return saveFile();
     }
 
+    public String getName(){
+        return name;
+    }
+
+    public boolean updateVRCName(String vrcName){
+        this.vrcName = vrcName;
+        file.set("vrcName", vrcName);
+        return saveFile();
+    }
+
+    public String getVRCName(){
+        return vrcName;
+    }
+
     public boolean updateLogo(String logo){
         this.logo = logo;
         file.set("logo", logo);
         return saveFile();
+    }
+
+    public String getLogo(){
+        return logo;
     }
 
     public boolean addGenre(String genre){
@@ -68,6 +86,10 @@ public class Profile {
         return saveFile();
     }
 
+    public String getGenres(){
+        return listToString(genres);
+    }
+
     public boolean addSocial(String social){
         socials.add(social);
         file.set("socials", socials);
@@ -80,10 +102,18 @@ public class Profile {
         return saveFile();
     }
 
+    public String getSocials(){
+        return listToString(socials);
+    }
+
     public boolean addDemoSet(String demoSet){
         demoSets.add(demoSet);
         file.set("demoSets", demoSets);
         return saveFile();
+    }
+
+    public String getDemoSets(){
+        return listToString(demoSets);
     }
 
     private boolean saveFile(){
@@ -97,8 +127,17 @@ public class Profile {
         }
     }
 
+    private String listToString(List<String> lst){
+        StringBuilder builder = new StringBuilder();
+        for (String s : lst){
+            builder.append(s).append(", ");
+        }
+        return builder.substring(0, builder.toString().length());
+    }
+
     public boolean newSave(){
         file.set("name", name);
+        file.set("vrcName", vrcName);
         file.set("logo", logo);
         file.set("genres", genres);
         file.set("socials", socials);
@@ -115,32 +154,38 @@ public class Profile {
     }
 
     public MessageEmbed getProfileEmbed(){
-        EmbedBuilder builder = new EmbedBuilder();
+        try {
+            EmbedBuilder builder = new EmbedBuilder();
 
-        builder.setColor(Color.yellow);
+            builder.setColor(Color.yellow);
 
-        builder.addField("DJ Name", name, false);
+            builder.addField("DJ Name", name, false);
 
-        builder.addField("Discord Name", Conductor.getInstance().getJDA().getUserById(discordID).getEffectiveName(), false);
+            builder.addField("Discord Name", Conductor.getInstance().getJDA().getUserById(discordID).getEffectiveName(), false);
 
-        builder.addField("VRChat Name", vrcName, false);
+            builder.addField("VRChat Name", vrcName, false);
 
-        String genreString = listFieldBuilder(genres);
-        genreString = String.format(genreString, "genres");
-        builder.addField("Genres", genreString, false);
+            String genreString = listFieldBuilder(genres);
+            genreString = String.format(genreString, "genres");
+            builder.addField("Genres", genreString, false);
 
-        String socialsString = listFieldBuilder(socials);
-        socialsString = String.format(socialsString, "socials");
-        builder.addField("Socials", socialsString, false);
+            String socialsString = listFieldBuilder(socials);
+            socialsString = String.format(socialsString, "socials");
+            builder.addField("Socials", socialsString, false);
 
-        String demoSetString = listFieldBuilder(demoSets);
-        demoSetString = String.format(demoSetString, "demo sets");
-        builder.addField("Demo Sets", demoSetString, false);
+            String demoSetString = listFieldBuilder(demoSets);
+            demoSetString = String.format(demoSetString, "demo sets");
+            builder.addField("Demo Sets", demoSetString, false);
 
-        if (logo.length() > 0)
-            builder.setThumbnail(logo);
+            if (logo.length() > 0)
+                builder.setThumbnail(logo);
 
-        return builder.build();
+            return builder.build();
+        }catch(IllegalArgumentException e){
+            System.err.println("A profile field is null");
+            e.printStackTrace();
+            return new EmbedBuilder().addField("Error", "A profile was found, but there is a blank field. Please notify a staff member of this issue.", false).build();
+        }
     }
 
     private String listFieldBuilder(List<String> lst){

@@ -6,10 +6,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.whispwriting.the_conductor.Main;
 import net.whispwriting.the_conductor.discord.Conductor;
-import net.whispwriting.the_conductor.discord.commands.command.Apply;
-import net.whispwriting.the_conductor.discord.commands.command.CloseDJApplications;
-import net.whispwriting.the_conductor.discord.commands.command.CreateAnnouncerChannel;
-import net.whispwriting.the_conductor.discord.commands.command.OpenDJApplications;
+import net.whispwriting.the_conductor.discord.commands.command.*;
 
 public class CommandDelegate {
 
@@ -27,13 +24,17 @@ public class CommandDelegate {
                         .addOption(OptionType.STRING, "genre", "Your genre")
                         .addOption(OptionType.STRING, "demo", "Link to your demo set"),
                 Commands.slash("open_dj_apps", "Open DJ applications"),
-                Commands.slash("close_dj_apps", "Close DJ Applications")
+                Commands.slash("close_dj_apps", "Close DJ Applications"),
+                Commands.slash("dj_lookup", "Look up information on DJs")
+                        .addOption(OptionType.STRING, "type", "name, vrc name, logo, genres, socials, demo sets, or full profile")
+                        .addOption(OptionType.USER, "dj", "DJ to find data for")
         ).queue();
 
         bot.registerCommand("announcer", new CreateAnnouncerChannel());
         bot.registerCommand("apply", new Apply());
         bot.registerCommand("open_dj_apps", new OpenDJApplications());
         bot.registerCommand("close_dj_apps", new CloseDJApplications());
+        bot.registerCommand("dj_lookup", new DJLookup());
         Main.getLogger().info("Commands initialized");
     }
 }

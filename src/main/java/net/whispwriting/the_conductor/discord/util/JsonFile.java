@@ -126,6 +126,10 @@ public class JsonFile {
         }
     }
 
+    public static boolean exists(String path, String name){
+        return new File(path, name + ".json").exists();
+    }
+
     public void save() throws IOException{
         writer = new FileWriter(file);
         writer.write(out.toString());

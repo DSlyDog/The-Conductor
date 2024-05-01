@@ -24,6 +24,7 @@ import net.whispwriting.the_conductor.discord.events.ButtonPress;
 import net.whispwriting.the_conductor.discord.events.MessageEvent;
 import net.whispwriting.the_conductor.discord.util.JsonFile;
 import net.whispwriting.the_conductor.discord.util.Profile;
+import net.whispwriting.the_conductor.discord.util.Strings;
 import org.w3c.dom.Text;
 
 import javax.security.auth.login.LoginException;
@@ -56,6 +57,7 @@ public class Conductor {
                 try {
                     Thread.sleep(5000);
                     loadAnnouncers();
+                    loadDJProfiles();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -93,6 +95,15 @@ public class Conductor {
                         announcerChannels.put((TextChannel) channel, (TextChannel) output);
                     }
                 }
+            }
+        }
+    }
+
+    private void loadDJProfiles(){
+        for (Member member : jda.getGuilds().get(0).getMembersWithRoles(jda.getRoleById(Strings.DJ_ROLE))){
+            if (JsonFile.exists("dj_profiles", member.getId())){
+                Profile profile = Profile.loadFromFile(member.getId());
+                profiles.put(member.getId(), profile);
             }
         }
     }
@@ -206,6 +217,11 @@ public class Conductor {
         Guild guild = jda.getGuilds().get(0);
         return guild.getRoleById(id);
     }
+
+    public Profile getProfile(Member member){
+        return profiles.get(member.getId());
+    }
+
     public List<TextChannel> getChannels(){
         return jda.getTextChannels();
     }
