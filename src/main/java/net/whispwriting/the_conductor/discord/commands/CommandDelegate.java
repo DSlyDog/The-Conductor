@@ -27,7 +27,12 @@ public class CommandDelegate {
                 Commands.slash("close_dj_apps", "Close DJ Applications"),
                 Commands.slash("dj_lookup", "Look up information on DJs")
                         .addOption(OptionType.STRING, "type", "name, vrc name, logo, genres, socials, demo sets, or full profile")
-                        .addOption(OptionType.USER, "dj", "DJ to find data for")
+                        .addOption(OptionType.USER, "dj", "DJ to find data for"),
+                Commands.slash("tickerset_welcome", "Set the ticker board welcome section")
+                        .addOption(OptionType.STRING, "top", "top section")
+                        .addOption(OptionType.STRING, "bottom", "bottom section")
+                        .addOption(OptionType.INTEGER, "displayOnPlatformAfterMinutes", "displayOnPlatformAfterMinutes")
+                        .addOption(OptionType.STRING, "ticker", "ticker panel, coma separated list")
         ).queue();
 
         bot.registerCommand("announcer", new CreateAnnouncerChannel());
