@@ -19,6 +19,7 @@ import net.whispwriting.the_conductor.Main;
 import net.whispwriting.the_conductor.discord.commands.Command;
 import net.whispwriting.the_conductor.discord.commands.CommandHandler;
 import net.whispwriting.the_conductor.discord.events.*;
+import net.whispwriting.the_conductor.discord.util.Application;
 import net.whispwriting.the_conductor.discord.util.JsonFile;
 import net.whispwriting.the_conductor.discord.util.Profile;
 import net.whispwriting.the_conductor.discord.util.Strings;
@@ -34,7 +35,7 @@ public class Conductor {
     private JsonFile announcers;
     private final CommandHandler handler = new CommandHandler();
     private Map<TextChannel, TextChannel> announcerChannels = new HashMap<>();
-    private static Map<String, Profile> applications = new HashMap<>();
+    private static Map<String, Application> applications = new HashMap<>();
     private Map<String, Profile> profiles = new HashMap<>();
     private String avatar;
 
@@ -55,6 +56,7 @@ public class Conductor {
                     Thread.sleep(5000);
                     loadAnnouncers();
                     loadDJProfiles();
+                    loadDJApplications();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -105,6 +107,20 @@ public class Conductor {
                 profiles.put(member.getId(), profile);
             }
         }
+    }
+
+    private void loadDJApplications(){
+        Role role = getRole(Strings.DJ_APPLICATION_ROLE, SearchType.ID);
+        List<Member> members = jda.getGuilds().get(0).getMembersWithRoles(role);
+        JsonFile file = new JsonFile("applications", "./");
+        for (Member member : members){
+            Profile profile = Profile.loadFromApplicationFile(member.getId());
+            String channelID = file.getString(member.getId() + ".app_channel");
+            TextChannel channel = (TextChannel) getChannel(channelID, SearchType.ID);
+            if (profile != null)
+                applications.put(member.getId(), new Application(profile, channel));
+        }
+
     }
     public JDA getJDA() {
         return jda;
@@ -256,12 +272,12 @@ public class Conductor {
     }
 
     public class ApplicationManager {
-        private static final TextChannel APPLICATION_CHANNEL = Conductor.getInstance().jda.getTextChannelById("1194827653279141938");
-        public static boolean addApplication(Profile profile, String discordID){
+        private static final TextChannel SUBMISSION_CHANNEL = Conductor.getInstance().jda.getTextChannelById(Strings.DJ_SUBMISSION_CHANNEL);
+        public static boolean addApplication(Profile profile, String discordID, TextChannel appChannel){
             if (applications.containsKey(discordID))
                 return false;
 
-            applications.put(discordID, profile);
+            applications.put(discordID, new Application(profile, appChannel));
             return true;
         }
 
@@ -273,13 +289,14 @@ public class Conductor {
                     .addEmbeds(profile.getProfileEmbed())
                             .addActionRow(accept, deny);
 
-            Conductor.getInstance().sendMessage(builder.build(), APPLICATION_CHANNEL, 1000);
+            Conductor.getInstance().sendMessage(builder.build(), SUBMISSION_CHANNEL, 1000);
         }
 
         public static boolean acceptApplication(String discordID){
-            Profile profile = applications.remove(discordID);
-            Conductor.getInstance().profiles.put(discordID, profile);
-            return profile.newSave();
+            Application application = applications.remove(discordID);
+            Conductor.getInstance().profiles.put(discordID, application.getProfile());
+            application.getApplicationChannel().getManager().setParent(Conductor.getInstance().getJDA().getCategoryById(Strings.DJ_APP_ARCHIVE_CATEGORY)).queue();
+            return application.getProfile().newSave();
         }
 
         public static void denyApplication(String discordID){

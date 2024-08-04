@@ -2,6 +2,7 @@ package net.whispwriting.the_conductor;
 
 import net.whispwriting.the_conductor.discord.Conductor;
 import net.whispwriting.the_conductor.discord.commands.CommandDelegate;
+import net.whispwriting.the_conductor.discord.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +22,8 @@ public class Main {
             LOGGER.error("You must provide the bot token");
             return;
         }
+
+        Strings.loadData();
 
         Conductor bot = Conductor.getInstance();
         try{

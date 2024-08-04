@@ -2,11 +2,14 @@ package net.whispwriting.the_conductor.discord.util;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.whispwriting.the_conductor.discord.Conductor;
+import org.json.simple.JSONObject;
 
 import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Profile {
@@ -171,6 +174,29 @@ public class Profile {
         }
     }
 
+    public boolean saveAsApplication(TextChannel channel){
+        JsonFile file = new JsonFile("applications", "./");
+        JSONObject json = new JSONObject();
+        json.put("name", name);
+        json.put("vrcName", vrcName);
+        json.put("logo", logo);
+        json.put("genres", genres);
+        json.put("socials", socials);
+        json.put("demoSets", demoSets);
+        json.put("app_channel", channel.getId());
+
+        file.set(discordID, json);
+
+        try{
+            file.save();
+            return true;
+        }catch(IOException e){
+            System.err.println("Failed to save application file");
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public MessageEmbed getProfileEmbed(){
         try {
             EmbedBuilder builder = new EmbedBuilder();
@@ -236,5 +262,13 @@ public class Profile {
         List<String> demoSets = file.getStringList("demoSets");
 
         return new Profile(discordID, vrcName, name, logo, genres, socials, demoSets, file);
+    }
+
+    public static Profile loadFromApplicationFile(String discordID) {
+        JsonFile file = new JsonFile("applications", "./");
+
+        return new Profile(discordID, file.getString(discordID + ".vrcName"), file.getString(discordID + ".name"), file.getString(discordID + ".logo"),
+                file.getStringList(discordID + ".genres"), file.getStringList(discordID + ".socials"),
+                file.getStringList(discordID + "demoSets"), new JsonFile(discordID, "dj_profiles"));
     }
 }

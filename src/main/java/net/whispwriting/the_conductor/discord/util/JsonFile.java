@@ -1,5 +1,6 @@
 package net.whispwriting.the_conductor.discord.util;
 
+import org.json.JSONString;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -56,6 +57,22 @@ public class JsonFile {
             System.err.println("parse failed for " + file.getPath());
             e.printStackTrace();
             return "";
+        }
+    }
+
+    public JSONObject getJSONString(String path){
+        try{
+            reader = new FileReader(file);
+            JSONObject json = (JSONObject) parser.parse(reader);
+            return (JSONObject) json.get(path);
+        }catch (IOException e){
+            System.err.println("File read error");
+            e.printStackTrace();
+            return null;
+        }catch(ParseException e){
+            System.err.println("parse failed for " + file.getPath());
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -135,6 +152,10 @@ public class JsonFile {
         writer.write(out.toString());
         writer.flush();
         writer.close();
+    }
+
+    public String getFilePath(){
+        return file.getAbsolutePath();
     }
 
 }

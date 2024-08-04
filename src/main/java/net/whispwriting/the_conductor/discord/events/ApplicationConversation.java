@@ -2,6 +2,7 @@ package net.whispwriting.the_conductor.discord.events;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -63,7 +64,7 @@ public class ApplicationConversation extends ListenerAdapter {
 
     public void start(){
         Conductor.getInstance().sendMessage("Hello, " + member.getAsMention() + "! \n\nThank you for your interest in " +
-                "DJing at our club. Please answer the following questions I'll get your application off to our head DJ asap.\n\n-\n\n", channel, delay);
+                "DJing at our club. Please answer the following questions and I'll get your application off to our head DJ asap.\n\n-\n\n", channel, delay);
         Conductor.getInstance().sendMessage("First, what is your DJ name?", channel, delay);
     }
 
@@ -189,11 +190,14 @@ public class ApplicationConversation extends ListenerAdapter {
 
     private void applicationFinalization(ButtonInteractionEvent event){
         if (event.getButton().getId().equals("good" + this.ticketID)){
-            Conductor.ApplicationManager.addApplication(profile, member.getId());
+            Conductor.ApplicationManager.addApplication(profile, member.getId(), channel);
             Conductor.ApplicationManager.sendApplicationMessage(member.getUser(), profile);
+            profile.saveAsApplication(channel);
             Conductor.getInstance().sendMessage("Okay! I've sent your application to our staff for review. I'll let you know the results asap!", channel, delay);
             Conductor.getInstance().getJDA().removeEventListener(this);
             channel.getPermissionContainer().getManager().putMemberPermissionOverride(Long.parseLong(event.getMember().getId()), allow, deny).queue();
+            Conductor.getInstance().getJDA().getGuilds().get(0).addRoleToMember(Conductor.getInstance().getJDA().getUserById(member.getId()),
+                    Conductor.getInstance().getRole(Strings.DJ_APPLICATION_ROLE, Conductor.SearchType.ID)).queue();
         }else if (event.getButton().getId().equals("bad" + this.ticketID)){
             step = 0;
             genres.clear();
@@ -228,13 +232,14 @@ public class ApplicationConversation extends ListenerAdapter {
         }
     }
 
-    private String listToString(List<String> lst){
+    private String listToString(List<String> lst) throws StringIndexOutOfBoundsException{
         StringBuilder builder = new StringBuilder();
         for (String s : lst){
             builder.append(s).append(", ");
         }
 
         return builder.substring(0, builder.toString().length()-2);
+
     }
 
     private void sendResponse(String message, String data){
@@ -251,10 +256,14 @@ public class ApplicationConversation extends ListenerAdapter {
         Button yes = Button.of(ButtonStyle.SUCCESS, "yes" + this.ticketID, "Yes");
         Button no = Button.of(ButtonStyle.DANGER, "no" + this.ticketID, "No");
 
-        MessageCreateBuilder builder = new MessageCreateBuilder();
-        builder.addContent(message.replace("%%", listToString(data)));
-        builder.addActionRow(yes, no);
-        Conductor.getInstance().sendMessage(builder.build(), channel, delay);
+        try {
+            MessageCreateBuilder builder = new MessageCreateBuilder();
+            builder.addContent(message.replace("%%", listToString(data)));
+            builder.addActionRow(yes, no);
+            Conductor.getInstance().sendMessage(builder.build(), channel, delay);
+        }catch(StringIndexOutOfBoundsException e){
+            Conductor.getInstance().sendMessage("You must provide at least one entry before pressing \"Done.\"", channel, delay);
+        }
     }
 
     private void sendResponseDoneButton(String message){

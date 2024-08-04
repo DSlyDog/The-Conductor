@@ -17,12 +17,6 @@ public class CommandDelegate {
                         .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
                         .addOption(OptionType.CHANNEL, "input", "input channel")
                         .addOption(OptionType.CHANNEL, "output", "output channel"),
-                Commands.slash("apply", "Apply to be a DJ")
-                        .addOption(OptionType.STRING, "dj_name", "Your DJ stage name")
-                        .addOption(OptionType.STRING, "vrc_name", "Your name on VRChat")
-                        .addOption(OptionType.ATTACHMENT, "logo", "Your DJ Logo")
-                        .addOption(OptionType.STRING, "genre", "Your genre")
-                        .addOption(OptionType.STRING, "demo", "Link to your demo set"),
                 Commands.slash("open_dj_apps", "Open DJ applications"),
                 Commands.slash("close_dj_apps", "Close DJ Applications"),
                 Commands.slash("dj_lookup", "Look up information on DJs")
@@ -36,7 +30,6 @@ public class CommandDelegate {
         ).queue();
 
         bot.registerCommand("announcer", new CreateAnnouncerChannel());
-        bot.registerCommand("apply", new Apply());
         bot.registerCommand("open_dj_apps", new OpenDJApplications());
         bot.registerCommand("close_dj_apps", new CloseDJApplications());
         bot.registerCommand("dj_lookup", new DJLookup());
