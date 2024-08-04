@@ -76,7 +76,7 @@ public class ApplicationConversation extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event){
-        if (!event.getMember().getId().equals(member.getId()) && !event.getMessage().getChannelId().equals(channel.getId())) {
+        if (!event.getMember().getId().equals(member.getId()) || !event.getMessage().getChannelId().equals(channel.getId())) {
             return;
         }
 
