@@ -26,12 +26,7 @@ public class CloseDJApplications implements Command {
             return;
         }
 
-        if (!Conductor.getInstance().getApplicationMessageID().equals("")) {
-            Conductor.getInstance().getJDA().getGuilds().get(0).getTextChannelById(Strings.DJ_APPLICATION_CHANNEL).retrieveMessageById(Conductor.getInstance().getApplicationMessageID()).complete().delete().queue();
-        }
-
-        Message applicationMessage = Conductor.getInstance().sendMessageWithReturn("At this time, DJ applications are closed.", event.getChannel().asTextChannel(), 1000);
-        Conductor.getInstance().setApplicationMessageID(applicationMessage.getId());
+        Conductor.getInstance().openDJApplications();
         event.reply("Applications successfully closed").setEphemeral(true).queue();
     }
 }

@@ -1,8 +1,8 @@
 package net.whispwriting.the_conductor.discord;
 
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
@@ -15,20 +15,16 @@ import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
-import net.dv8tion.jda.api.utils.messages.MessageData;
 import net.whispwriting.the_conductor.Main;
 import net.whispwriting.the_conductor.discord.commands.Command;
 import net.whispwriting.the_conductor.discord.commands.CommandHandler;
-import net.whispwriting.the_conductor.discord.events.ApplyButton;
-import net.whispwriting.the_conductor.discord.events.ButtonPress;
-import net.whispwriting.the_conductor.discord.events.MessageEvent;
+import net.whispwriting.the_conductor.discord.events.*;
 import net.whispwriting.the_conductor.discord.util.JsonFile;
 import net.whispwriting.the_conductor.discord.util.Profile;
 import net.whispwriting.the_conductor.discord.util.Strings;
-import org.w3c.dom.Text;
 
 import javax.security.auth.login.LoginException;
-import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +39,7 @@ public class Conductor {
     private String avatar;
 
     private String applicationMessageID = "";
+    private boolean isAcceptingApplications;
 
     public enum SearchType{
         NAME,
@@ -81,6 +78,8 @@ public class Conductor {
         jda.addEventListener(new MessageEvent());
         jda.addEventListener(new ButtonPress());
         jda.addEventListener((new ApplyButton()));
+        jda.addEventListener(new CreateProfileButton());
+        jda.addEventListener(new UpdateProfileButton());
         avatar = jda.getSelfUser().getAvatarUrl();
     }
 
@@ -222,6 +221,10 @@ public class Conductor {
         return profiles.get(member.getId());
     }
 
+    public void addProfile(Member member, Profile profile){
+        profiles.put(member.getId(), profile);
+    }
+
     public List<TextChannel> getChannels(){
         return jda.getTextChannels();
     }
@@ -234,9 +237,18 @@ public class Conductor {
         return this.applicationMessageID;
     }
 
+    public void openDJApplications(){
+        this.isAcceptingApplications = true;
+    }
+
+    public void closeDJApplicaations(){
+        this.isAcceptingApplications = false;
+    }
+
     public void stop(){
         jda.shutdown();
     }
+
     public static Conductor getInstance() {
         if (instance == null)
             instance = new Conductor();

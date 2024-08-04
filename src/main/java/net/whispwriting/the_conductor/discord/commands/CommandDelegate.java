@@ -31,7 +31,7 @@ public class CommandDelegate {
                 Commands.slash("tickerset_welcome", "Set the ticker board welcome section")
                         .addOption(OptionType.STRING, "top", "top section")
                         .addOption(OptionType.STRING, "bottom", "bottom section")
-                        .addOption(OptionType.INTEGER, "displayOnPlatformAfterMinutes", "displayOnPlatformAfterMinutes")
+                        .addOption(OptionType.INTEGER, "display_after_minutes", "displayOnPlatformAfterMinutes")
                         .addOption(OptionType.STRING, "ticker", "ticker panel, coma separated list")
         ).queue();
 

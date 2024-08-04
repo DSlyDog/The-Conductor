@@ -1,5 +1,6 @@
 package net.whispwriting.the_conductor.discord.events;
 
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -11,11 +12,9 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.whispwriting.the_conductor.Main;
 import net.whispwriting.the_conductor.discord.Conductor;
 import net.whispwriting.the_conductor.discord.util.Profile;
+import net.whispwriting.the_conductor.discord.util.Strings;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ApplicationConversation extends ListenerAdapter {
 
@@ -23,6 +22,7 @@ public class ApplicationConversation extends ListenerAdapter {
     private TextChannel channel;
     private int ticketID;
     private int step = 0;
+    private int delay = 1000;
 
     private Profile profile;
     private Map<Integer, String> questions = new HashMap<>();
@@ -33,6 +33,10 @@ public class ApplicationConversation extends ListenerAdapter {
     private List<String> genres = new ArrayList<>();
     private List<String> demos = new ArrayList<>();
     private List<String> socials = new ArrayList<>();
+    private boolean isApplicationContext = false;
+
+    List<Permission> allow = new ArrayList<>();
+    List<Permission> deny  = new ArrayList<>();
 
     public ApplicationConversation(Member member, TextChannel channel, int ticketID){
         this.member = member;
@@ -43,7 +47,7 @@ public class ApplicationConversation extends ListenerAdapter {
         questions.put(1, "What is your VRChat name?");
         questions.put(2, "What genres do you play? Please add each in its own message. When you are done, press \"Done\"");
         questions.put(3, "What are your socials? Please add each in its own message. When you are done, press \"Done\"");
-        questions.put(4, "What's your logo? Please attach it to your message.");
+        questions.put(4, "What's your logo? Please attach it to your message. If you don't have one, simply say so.");
         questions.put(5, "Please provide a link to a demo set. It should be no longer than 60 minutes");
         questions.put(6, "This is your profile. If everything looks good, I'll send it off");
 
@@ -52,12 +56,21 @@ public class ApplicationConversation extends ListenerAdapter {
         responses.put(2, "For your genres, I've got: %%. Is this correct?");
         responses.put(3, "For your socials, I've got: %%. Is this correct?");
         responses.put(5, "Okay, your demo link is: %%. Is this correct?");
+
+        allow.add(Permission.VIEW_CHANNEL);
+        deny.add(Permission.MESSAGE_SEND);
     }
 
     public void start(){
         Conductor.getInstance().sendMessage("Hello, " + member.getAsMention() + "! \n\nThank you for your interest in " +
-                "DJing at our club. Please answer the following questions I'll get your application off to our head DJ asap.\n\n-\n\n", channel, 1000);
-        Conductor.getInstance().sendMessage("First, what is your DJ name?", channel, 1000);
+                "DJing at our club. Please answer the following questions I'll get your application off to our head DJ asap.\n\n-\n\n", channel, delay);
+        Conductor.getInstance().sendMessage("First, what is your DJ name?", channel, delay);
+    }
+
+    public void startProfile(){
+        Conductor.getInstance().sendMessage("Hello, " + member.getAsMention() + "! \n\nLet's get your profile built.\n\n-\n\n", channel, delay);
+        Conductor.getInstance().sendMessage("First, what is your DJ name?", channel, delay);
+        this.isApplicationContext = true;
     }
 
     @Override
@@ -104,7 +117,7 @@ public class ApplicationConversation extends ListenerAdapter {
                 switch (step){
                     case 0:
                         step++;
-                        Conductor.getInstance().sendMessage("Wonderful! " + questions.get(step), channel, 1000);
+                        Conductor.getInstance().sendMessage("Wonderful! " + questions.get(step), channel, delay);
                         break;
                     case 1:
                         step++;
@@ -117,26 +130,28 @@ public class ApplicationConversation extends ListenerAdapter {
                     case 3:
                         step++;
                         builder.addContent("Fantastic! " + questions.get(step));
-                        Conductor.getInstance().sendMessage(builder.build(), channel, 1000);
+                        Conductor.getInstance().sendMessage(builder.build(), channel, delay);
                         break;
                     case 4:
                         step++;
                         builder.addContent("Excellent! " + questions.get(step));
-                        Conductor.getInstance().sendMessage(builder.build(), channel, 1000);
+                        Conductor.getInstance().sendMessage(builder.build(), channel, delay);
                         break;
                     case 5:
                         step++;
 
-                        Conductor.getInstance().sendMessage("Perfect!", channel, 1000);
+                        Conductor.getInstance().sendMessage("Perfect!", channel, delay);
 
                         Button good = Button.of(ButtonStyle.SUCCESS, "good" + this.ticketID, "Looks good, send it!");
                         Button bad = Button.of(ButtonStyle.DANGER, "bad" + this.ticketID, "That's not right, let me start over");
                         Button cancel = Button.of(ButtonStyle.PRIMARY, "cancel" + this.ticketID, "Nevermind, cancel my application");
+                        if (!isApplicationContext)
+                            cancel = Button.of(ButtonStyle.PRIMARY, "cancel" + this.ticketID, "Nevermind, cancel my submission.");
                         profile = Profile.buildFromApplication(member.getId(), vrcName, name, logo, genres, socials, demos);
                         builder.addContent(questions.get(step));
                         builder.addActionRow(good, bad, cancel);
                         builder.addEmbeds(profile.getProfileEmbed());
-                        Conductor.getInstance().sendMessage(builder.build(), channel, 1000);
+                        Conductor.getInstance().sendMessage(builder.build(), channel, delay);
                         break;
                 }
             }else if (event.getButton().getId().equals("no" + this.ticketID)){
@@ -150,7 +165,7 @@ public class ApplicationConversation extends ListenerAdapter {
                         sendResponseDoneButton("Okay, let's try that again. " + questions.get(step));
                         break;
                     default:
-                        Conductor.getInstance().sendMessage("Okay, let's try that again. " + questions.get(step), channel, 1000);
+                        Conductor.getInstance().sendMessage("Okay, let's try that again. " + questions.get(step), channel, delay);
                 }
             }else if (event.getButton().getId().equals("done" + this.ticketID)){
                 switch (step){
@@ -161,23 +176,55 @@ public class ApplicationConversation extends ListenerAdapter {
                         sendResponse(responses.get(step), socials);
                         break;
                 }
-            }else if (event.getButton().getId().equals("good" + this.ticketID)){
-                Conductor.ApplicationManager.addApplication(profile, member.getId());
-                Conductor.ApplicationManager.sendApplicationMessage(member.getUser(), profile);
-                Conductor.getInstance().sendMessage("Okay! I've sent your application to our staff for review. I'll let you know the results asap!", channel, 1000);
-                Conductor.getInstance().getJDA().removeEventListener(this);
-            }else if (event.getButton().getId().equals("bad" + this.ticketID)){
-                step = 0;
-                genres.clear();
-                socials.clear();
-                demos.clear();
-                Conductor.getInstance().sendMessage("My apologies, let's start over. " + questions.get(step), channel, 1000);
-            }else if (event.getButton().getId().equals("cancel" + this.ticketID)){
-                Conductor.getInstance().sendMessage("I'm sorry things didn't quite work out. If you'd like to apply in the future, please open a new application. " +
-                        "Thank you, and have a great day", channel, 1000);
-                Conductor.getInstance().getJDA().removeEventListener(this);
+            }else {
+                if (isApplicationContext){
+                    profileFinalization(event);
+                }else{
+                    applicationFinalization(event);
+                }
             }
-            event.deferEdit().queue();
+        }
+        event.deferEdit().queue();
+    }
+
+    private void applicationFinalization(ButtonInteractionEvent event){
+        if (event.getButton().getId().equals("good" + this.ticketID)){
+            Conductor.ApplicationManager.addApplication(profile, member.getId());
+            Conductor.ApplicationManager.sendApplicationMessage(member.getUser(), profile);
+            Conductor.getInstance().sendMessage("Okay! I've sent your application to our staff for review. I'll let you know the results asap!", channel, delay);
+            Conductor.getInstance().getJDA().removeEventListener(this);
+            channel.getPermissionContainer().getManager().putMemberPermissionOverride(Long.parseLong(event.getMember().getId()), allow, deny).queue();
+        }else if (event.getButton().getId().equals("bad" + this.ticketID)){
+            step = 0;
+            genres.clear();
+            socials.clear();
+            demos.clear();
+            Conductor.getInstance().sendMessage("My apologies, let's start over. " + questions.get(step), channel, delay);
+        }else if (event.getButton().getId().equals("cancel" + this.ticketID)){
+            Conductor.getInstance().sendMessage("I'm sorry things didn't quite work out. If you'd like to apply in the future, please open a new application. " +
+                    "Thank you, and have a great day", channel, 1000);
+            Conductor.getInstance().getJDA().removeEventListener(this);
+            channel.getPermissionContainer().getManager().putMemberPermissionOverride(Long.parseLong(event.getMember().getId()), allow, deny).queue();
+        }
+    }
+
+    private void profileFinalization(ButtonInteractionEvent event){
+        if (event.getButton().getId().equals("good" + this.ticketID)){
+            Conductor.getInstance().addProfile(member, profile);
+            profile.newSave();
+            Conductor.getInstance().sendMessage("Okay! Your profile is in our database! Thank you.", channel, delay);
+            Conductor.getInstance().getJDA().removeEventListener(this);
+            channel.getPermissionContainer().getManager().putMemberPermissionOverride(Long.parseLong(event.getMember().getId()), allow, deny).queue();
+        }else if (event.getButton().getId().equals("bad" + this.ticketID)){
+            step = 0;
+            genres.clear();
+            socials.clear();
+            demos.clear();
+            Conductor.getInstance().sendMessage("My apologies, let's start over. " + questions.get(step), channel, delay);
+        }else if (event.getButton().getId().equals("cancel" + this.ticketID)){
+            Conductor.getInstance().sendMessage("I'm sorry things didn't quite work out. Thank you, and have a great day", channel, delay);
+            Conductor.getInstance().getJDA().removeEventListener(this);
+            channel.getPermissionContainer().getManager().putMemberPermissionOverride(Long.parseLong(event.getMember().getId()), allow, deny).queue();
         }
     }
 
@@ -197,7 +244,7 @@ public class ApplicationConversation extends ListenerAdapter {
         MessageCreateBuilder builder = new MessageCreateBuilder();
         builder.addContent(message.replace("%%", data));
         builder.addActionRow(yes, no);
-        Conductor.getInstance().sendMessage(builder.build(), channel, 1000);
+        Conductor.getInstance().sendMessage(builder.build(), channel, delay);
     }
 
     private void sendResponse(String message, List<String> data){
@@ -207,7 +254,7 @@ public class ApplicationConversation extends ListenerAdapter {
         MessageCreateBuilder builder = new MessageCreateBuilder();
         builder.addContent(message.replace("%%", listToString(data)));
         builder.addActionRow(yes, no);
-        Conductor.getInstance().sendMessage(builder.build(), channel, 1000);
+        Conductor.getInstance().sendMessage(builder.build(), channel, delay);
     }
 
     private void sendResponseDoneButton(String message){
@@ -216,6 +263,6 @@ public class ApplicationConversation extends ListenerAdapter {
         MessageCreateBuilder builder = new MessageCreateBuilder();
         builder.addContent(message);
         builder.addActionRow(done);
-        Conductor.getInstance().sendMessage(builder.build(), channel, 1000);
+        Conductor.getInstance().sendMessage(builder.build(), channel, delay);
     }
 }

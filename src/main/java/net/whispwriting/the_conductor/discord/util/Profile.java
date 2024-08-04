@@ -90,6 +90,10 @@ public class Profile {
         return listToString(genres);
     }
 
+    public List<String> getGenresList(){
+        return genres;
+    }
+
     public boolean addSocial(String social){
         socials.add(social);
         file.set("socials", socials);
@@ -106,14 +110,28 @@ public class Profile {
         return listToString(socials);
     }
 
+    public List<String> getSocialsList(){
+        return socials;
+    }
+
     public boolean addDemoSet(String demoSet){
         demoSets.add(demoSet);
         file.set("demoSets", demoSets);
         return saveFile();
     }
 
+    public boolean removeDemoSet(int index){
+        demoSets.remove(index);
+        file.set("demoSets", demoSets);
+        return saveFile();
+    }
+
     public String getDemoSets(){
         return listToString(demoSets);
+    }
+
+    public List<String> getDemoSetsList(){
+        return demoSets;
     }
 
     private boolean saveFile(){

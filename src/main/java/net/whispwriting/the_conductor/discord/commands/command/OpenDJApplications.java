@@ -28,15 +28,21 @@ public class OpenDJApplications implements Command {
             return;
         }
 
-        if (!Conductor.getInstance().getApplicationMessageID().equals("")){
-            Conductor.getInstance().getJDA().getGuilds().get(0).getTextChannelById(Strings.DJ_APPLICATION_CHANNEL).retrieveMessageById(Conductor.getInstance().getApplicationMessageID()).complete().delete().queue();
+        if (Conductor.getInstance().getApplicationMessageID().equals("")) {
+            Button apply = Button.of(ButtonStyle.SUCCESS, "apply", "Apply");
+            Button profile = Button.of(ButtonStyle.SUCCESS, "create_profile", "Create Profile");
+            Button update = Button.of(ButtonStyle.SUCCESS, "update_profile", "Update Profile");
+            MessageCreateBuilder builder = new MessageCreateBuilder();
+            builder.addContent("Greetings! \n\nClick the \"Apply\" button below to submit a DJ application. If you " +
+                    "are already a DJ and don't have a profile, click the \"Create Profile\" button. If you are a DJ looking " +
+                    "to update your profile, click \"Update Profile\"");
+            builder.addActionRow(apply, profile, update);
+            Message message = Conductor.getInstance().sendMessageWithReturn(builder.build(), channel, 1000);
+            Conductor.getInstance().setApplicationMessageID(message.getId());
+            event.reply("Applications successfully opened!").setEphemeral(true).queue();
         }
-        Button apply = Button.of(ButtonStyle.SUCCESS, "apply", "Apply");
-        MessageCreateBuilder builder = new MessageCreateBuilder();
-        builder.addContent("Greetings! \n\nDJ applications are open! Click the \"Apply\" button below to apply.");
-        builder.addActionRow(apply);
-        Message message = Conductor.getInstance().sendMessageWithReturn(builder.build(), channel, 1000);
-        Conductor.getInstance().setApplicationMessageID(message.getId());
-        event.reply("Success!").setEphemeral(true).queue();
+
+        Conductor.getInstance().openDJApplications();
+        event.reply("Applications successfully opened").setEphemeral(true).queue();
     }
 }
