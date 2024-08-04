@@ -15,7 +15,7 @@ public class ApplyButton extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event){
-        if (event.getButton().getId().equals("apply") && !event.isAcknowledged()){
+        if (event.getButton().getId().equals("apply")){
             if (event.getMember().getRoles().contains(Conductor.getInstance().getRole(Strings.DJ_ROLE, Conductor.SearchType.ID))){
                 event.reply("You're already a DJ, silly!").setEphemeral(true).queue();
                 return;

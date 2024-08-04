@@ -76,36 +76,36 @@ public class ApplicationConversation extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event){
-        if (event.getMember().getId().equals(member.getId()) && event.getMessage().getChannelId().equals(channel.getId())){
-            switch (step){
-                case 0:
-                    this.name = event.getMessage().getContentRaw();
-                    sendResponse(responses.get(step), this.name);
-                    break;
-                case 1:
-                    this.vrcName = event.getMessage().getContentRaw();
-                    sendResponse(responses.get(step), this.vrcName);
-                    break;
-                case 2:
-                    genres.add(event.getMessage().getContentRaw());
-                    break;
-                case 3:
-                    socials.add(event.getMessage().getContentRaw());
-                    break;
-                case 4:
-                    if (event.getMessage().getAttachments().size() == 0) {
-                        this.logo = "";
-                        sendResponse("You do not have a logo, correct?", this.logo);
-                    }else {
-                        this.logo = event.getMessage().getAttachments().get(0).getUrl();
-                        sendResponse("Is the image you provided correct?", this.logo);
-                    }
-                    break;
-                case 5:
-                    demos.add(event.getMessage().getContentRaw());
-                    sendResponse(responses.get(step), demos);
-                    break;
-            }
+        if (!event.getMember().getId().equals(member.getId()) && !event.getMessage().getChannelId().equals(channel.getId())) {
+            return;
+        }
+
+        switch (step){
+            case 0:
+                this.name = event.getMessage().getContentRaw();
+                sendResponse(responses.get(step), this.name);
+                break;
+            case 1:
+                this.vrcName = event.getMessage().getContentRaw();
+                sendResponse(responses.get(step), this.vrcName);
+                break;
+            case 2:
+                genres.add(event.getMessage().getContentRaw());
+                break;
+            case 3:
+                socials.add(event.getMessage().getContentRaw());
+                break;
+            case 4:
+                if (event.getMessage().getAttachments().size() == 0) {
+                    this.logo = "";
+                    sendResponse("You do not have a logo, correct?", this.logo);
+                }else {
+                    this.logo = event.getMessage().getAttachments().get(0).getUrl();
+                    sendResponse("Is the image you provided correct?", this.logo);
+                }
+                break; case 5: demos.add(event.getMessage().getContentRaw());
+                sendResponse(responses.get(step), demos);
+                break;
         }
     }
 
@@ -114,7 +114,13 @@ public class ApplicationConversation extends ListenerAdapter {
         if (event.getMember().getId().equals(member.getId())){
             MessageCreateBuilder builder = new MessageCreateBuilder();
 
-            if (event.getButton().getId().equals("yes" + this.ticketID)){
+            if (!event.getButton().getId().contains(this.ticketID + "")){
+                return;
+            }
+
+            event.deferEdit().queue();
+
+            if (event.getButton().getId().contains("yes")){
                 switch (step){
                     case 0:
                         step++;
@@ -155,7 +161,7 @@ public class ApplicationConversation extends ListenerAdapter {
                         Conductor.getInstance().sendMessage(builder.build(), channel, delay);
                         break;
                 }
-            }else if (event.getButton().getId().equals("no" + this.ticketID)){
+            }else if (event.getButton().getId().contains("no")){
                 switch (step) {
                     case 2:
                         genres.clear();
@@ -168,7 +174,7 @@ public class ApplicationConversation extends ListenerAdapter {
                     default:
                         Conductor.getInstance().sendMessage("Okay, let's try that again. " + questions.get(step), channel, delay);
                 }
-            }else if (event.getButton().getId().equals("done" + this.ticketID)){
+            }else if (event.getButton().getId().contains("done")){
                 switch (step){
                     case 2:
                         sendResponse(responses.get(step), genres);
@@ -185,7 +191,6 @@ public class ApplicationConversation extends ListenerAdapter {
                 }
             }
         }
-        event.deferEdit().queue();
     }
 
     private void applicationFinalization(ButtonInteractionEvent event){
