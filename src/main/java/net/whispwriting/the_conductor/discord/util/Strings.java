@@ -17,7 +17,7 @@ public class Strings {
     public static void loadData(){
         JsonFile file = new JsonFile("config", "./");
 
-        if (!JsonFile.exists("config", "")) {
+        if (!JsonFile.exists("config", "./")) {
             file.set("admin_role", ADMIN_ROLE);
             file.set("dj_role", DJ_ROLE);
             file.set("dj_application_role", DJ_APPLICATION_ROLE);
