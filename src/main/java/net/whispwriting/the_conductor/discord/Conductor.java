@@ -23,6 +23,7 @@ import net.whispwriting.the_conductor.discord.util.Application;
 import net.whispwriting.the_conductor.discord.util.JsonFile;
 import net.whispwriting.the_conductor.discord.util.Profile;
 import net.whispwriting.the_conductor.discord.util.Strings;
+import org.json.simple.JSONObject;
 
 import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
@@ -115,7 +116,8 @@ public class Conductor {
         JsonFile file = new JsonFile("applications", "./");
         for (Member member : members){
             Profile profile = Profile.loadFromApplicationFile(member.getId());
-            String channelID = file.getString(member.getId() + ".app_channel");
+            JSONObject json = file.getJSONString(member.getId());
+            String channelID = (String) json.get("app_channel");
             TextChannel channel = (TextChannel) getChannel(channelID, SearchType.ID);
             if (profile != null)
                 applications.put(member.getId(), new Application(profile, channel));
@@ -300,6 +302,7 @@ public class Conductor {
         }
 
         public static void denyApplication(String discordID){
+            applications.get(discordID).getApplicationChannel().delete().queue();
             applications.remove(discordID);
         }
     }
