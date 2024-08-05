@@ -7,6 +7,8 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
@@ -117,6 +119,8 @@ public class ApplicationConversation extends ListenerAdapter {
             if (!event.getButton().getId().contains(this.ticketID + "")){
                 return;
             }
+
+            event.getMessage().editMessageComponents().setComponents().queue();
 
             event.deferEdit().queue();
 
