@@ -7,12 +7,12 @@ import java.io.IOException;
 
 public class Strings {
 
-    public static String ADMIN_ROLE = "775440914578669570";
-    public static String DJ_ROLE = "1194892753532895363";
-    public static String DJ_APPLICATION_ROLE = "1269748432570941530";
-    public static String DJ_APPLICATION_CATEGORY = "1234681055664144515";
-    public static String DJ_SUBMISSION_CHANNEL = "1194827653279141938";
-    public static String DJ_APP_ARCHIVE_CATEGORY = "1269770865520939118";
+    public static String ADMIN_ROLE = "";
+    public static String DJ_ROLE = "";
+    public static String DJ_APPLICATION_ROLE = "";
+    public static String DJ_APPLICATION_CATEGORY = "";
+    public static String DJ_SUBMISSION_CHANNEL = "";
+    public static String DJ_APP_ARCHIVE_CATEGORY = "";
 
     public static void loadData(){
         JsonFile file = new JsonFile("config", "./");
