@@ -9,7 +9,6 @@ import org.json.simple.JSONObject;
 import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Profile {

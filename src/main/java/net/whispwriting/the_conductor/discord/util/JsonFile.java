@@ -1,6 +1,5 @@
 package net.whispwriting.the_conductor.discord.util;
 
-import org.json.JSONString;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

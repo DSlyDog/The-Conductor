@@ -1,7 +1,6 @@
 package net.whispwriting.the_conductor.discord.util;
 
 import net.whispwriting.the_conductor.Main;
-import org.json.JSONException;
 
 import java.io.IOException;
 

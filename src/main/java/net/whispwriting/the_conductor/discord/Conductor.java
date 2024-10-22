@@ -2,7 +2,6 @@ package net.whispwriting.the_conductor.discord;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
@@ -26,7 +25,6 @@ import net.whispwriting.the_conductor.discord.util.Strings;
 import org.json.simple.JSONObject;
 
 import javax.security.auth.login.LoginException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
