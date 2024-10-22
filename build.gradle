@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'net.whispwriting'
-version '1.0.0'
+version '1.0.3'
 
 application {
     mainClassName = 'net.whispwriting.the_conductor.Main'

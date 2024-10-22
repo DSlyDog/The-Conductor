@@ -176,6 +176,7 @@ public class Profile {
 
     public boolean saveAsApplication(TextChannel channel){
         JsonFile file = new JsonFile("applications", "./");
+        file.createFile();
         JSONObject json = new JSONObject();
         json.put("name", name);
         json.put("vrcName", vrcName);
@@ -242,18 +243,21 @@ public class Profile {
 
     public static Profile buildFromApplication(String discordID, String vrcName, String name, String logo, String genre, String demo){
         JsonFile file = new JsonFile(discordID, "dj_profiles");
+        file.createFile();
 
         return new Profile(discordID, vrcName, name, logo, genre, demo, file);
     }
 
     public static Profile buildFromApplication(String discordID, String vrcName, String name, String logo, List<String> genres, List<String> socials, List<String> demoSets){
         JsonFile file = new JsonFile(discordID, "dj_profiles");
+        file.createFile();
 
         return new Profile(discordID, vrcName, name, logo, genres, socials, demoSets, file);
     }
 
     public static Profile loadFromFile(String discordID){
         JsonFile file = new JsonFile(discordID, "dj_profiles");
+        file.createFile();
         String name = file.getString("name");
         String vrcName = file.getString("vrcName");
         String logo = file.getString("logo");
@@ -266,6 +270,7 @@ public class Profile {
 
     public static Profile loadFromApplicationFile(String discordID) {
         JsonFile file = new JsonFile("applications", "./");
+        file.createFile();
 
         return new Profile(discordID, file.getString(discordID + ".vrcName"), file.getString(discordID + ".name"), file.getString(discordID + ".logo"),
                 file.getStringList(discordID + ".genres"), file.getStringList(discordID + ".socials"),

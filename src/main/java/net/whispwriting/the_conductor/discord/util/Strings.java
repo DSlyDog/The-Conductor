@@ -17,7 +17,8 @@ public class Strings {
     public static void loadData(){
         JsonFile file = new JsonFile("config", "./");
 
-        if (!JsonFile.exists("config", "./")) {
+        if (!file.exists()) {
+            file.createFile();
             file.set("admin_role", ADMIN_ROLE);
             file.set("dj_role", DJ_ROLE);
             file.set("dj_application_role", DJ_APPLICATION_ROLE);
@@ -32,6 +33,7 @@ public class Strings {
                 e.printStackTrace();
             }
         }else {
+            file.createFile();
             ADMIN_ROLE = file.getString("admin_role");
             DJ_ROLE = file.getString("dj_role");
             DJ_APPLICATION_ROLE = file.getString("dj_application_role");

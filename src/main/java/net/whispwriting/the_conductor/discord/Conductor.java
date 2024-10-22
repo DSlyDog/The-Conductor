@@ -76,6 +76,7 @@ public class Conductor {
                 .build();
         jda.getPresence().setActivity(Activity.of(Activity.ActivityType.PLAYING, "VRChat"));
         announcers = new JsonFile("announcers", System.getProperty("user.dir"));
+        announcers.createFile();
         postLoad.start();
         jda.addEventListener(handler);
         jda.addEventListener(new MessageEvent());
@@ -102,6 +103,12 @@ public class Conductor {
     }
 
     private void loadDJProfiles(){
+        if (Strings.DJ_ROLE.isEmpty()) {
+            Main.getLogger().warn("DJ role has not been set. Other roles likely also need to be set. Please do this " +
+                    "before using the bot.");
+            return;
+        }
+
         for (Member member : jda.getGuilds().get(0).getMembersWithRoles(jda.getRoleById(Strings.DJ_ROLE))){
             if (JsonFile.exists("dj_profiles", member.getId())){
                 Profile profile = Profile.loadFromFile(member.getId());
@@ -111,6 +118,12 @@ public class Conductor {
     }
 
     private void loadDJApplications(){
+        if (Strings.DJ_APPLICATION_ROLE.isEmpty()) {
+            Main.getLogger().warn("DJ application role has not been set. Other roles likely also need to be set. Please do this " +
+                    "before using the bot.");
+            return;
+        }
+
         Role role = getRole(Strings.DJ_APPLICATION_ROLE, SearchType.ID);
         List<Member> members = jda.getGuilds().get(0).getMembersWithRoles(role);
         JsonFile file = new JsonFile("applications", "./");

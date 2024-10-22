@@ -17,10 +17,14 @@ public class JsonFile {
     private File file;
     private JSONParser parser = new JSONParser();
     private JSONObject out = new JSONObject();
-    private String name;
+    private String name, path;
 
     public JsonFile(String name, String path) {
         this.name = name;
+        this.path = path;
+    }
+
+    public boolean createFile(){
         File fPath = new File(path);
         if (!fPath.exists())
             fPath.mkdirs();
@@ -28,11 +32,14 @@ public class JsonFile {
         if (!file.exists()) {
             try {
                 file.createNewFile();
+                return true;
             } catch (IOException e) {
                 System.err.println("Failed to create file");
                 e.printStackTrace();
+                return false;
             }
         }
+        return false;
     }
 
     public void set(String path, Object object){
@@ -143,7 +150,12 @@ public class JsonFile {
         }
     }
 
+    @Deprecated
     public static boolean exists(String name, String path){
+        return new File(path, name + ".json").exists();
+    }
+
+    public boolean exists(){
         return new File(path, name + ".json").exists();
     }
 
