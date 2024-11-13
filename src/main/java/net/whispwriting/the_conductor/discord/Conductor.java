@@ -125,6 +125,7 @@ public class Conductor {
         Role role = getRole(Strings.DJ_APPLICATION_ROLE, SearchType.ID);
         List<Member> members = jda.getGuilds().get(0).getMembersWithRoles(role);
         JsonFile file = new JsonFile("applications", "./");
+        file.createFile();
         for (Member member : members){
             Profile profile = Profile.loadFromApplicationFile(member.getId());
             JSONObject json = file.getJSONString(member.getId());

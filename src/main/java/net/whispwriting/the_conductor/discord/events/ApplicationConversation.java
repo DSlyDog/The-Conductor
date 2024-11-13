@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.whispwriting.the_conductor.discord.Conductor;
 import net.whispwriting.the_conductor.discord.util.Profile;
 import net.whispwriting.the_conductor.discord.util.Strings;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -94,7 +95,7 @@ public class ApplicationConversation extends ListenerAdapter {
                 socials.add(event.getMessage().getContentRaw());
                 break;
             case 4:
-                if (event.getMessage().getAttachments().size() == 0) {
+                if (event.getMessage().getAttachments().isEmpty()) {
                     this.logo = "";
                     sendResponse("You do not have a logo, correct?", this.logo);
                 }else {
@@ -102,7 +103,7 @@ public class ApplicationConversation extends ListenerAdapter {
                     sendResponse("Is the image you provided correct?", this.logo);
                 }
                 break; case 5: demos.add(event.getMessage().getContentRaw());
-                sendResponse(responses.get(step), demos);
+                sendResponse(responses.get(step), demos, null);
                 break;
         }
     }
@@ -116,7 +117,9 @@ public class ApplicationConversation extends ListenerAdapter {
                 return;
             }
 
-            event.getMessage().editMessageComponents().setComponents().queue();
+            if (!event.getButton().getId().contains("done")) {
+                event.getMessage().editMessageComponents().setComponents().queue();
+            }
 
             event.deferEdit().queue();
 
@@ -177,10 +180,10 @@ public class ApplicationConversation extends ListenerAdapter {
             }else if (event.getButton().getId().contains("done")){
                 switch (step){
                     case 2:
-                        sendResponse(responses.get(step), genres);
+                        sendResponse(responses.get(step), genres, event);
                         break;
                     case 3:
-                        sendResponse(responses.get(step), socials);
+                        sendResponse(responses.get(step), socials, event);
                         break;
                 }
             }else {
@@ -257,7 +260,7 @@ public class ApplicationConversation extends ListenerAdapter {
         Conductor.getInstance().sendMessage(builder.build(), channel, delay);
     }
 
-    private void sendResponse(String message, List<String> data){
+    private void sendResponse(String message, List<String> data, @Nullable ButtonInteractionEvent event){
         Button yes = Button.of(ButtonStyle.SUCCESS, "yes" + this.ticketID, "Yes");
         Button no = Button.of(ButtonStyle.DANGER, "no" + this.ticketID, "No");
 
@@ -265,6 +268,10 @@ public class ApplicationConversation extends ListenerAdapter {
             MessageCreateBuilder builder = new MessageCreateBuilder();
             builder.addContent(message.replace("%%", listToString(data)));
             builder.addActionRow(yes, no);
+
+            if (event != null)
+                event.getMessage().editMessageComponents().setComponents().queue();
+
             Conductor.getInstance().sendMessage(builder.build(), channel, delay);
         }catch(StringIndexOutOfBoundsException e){
             Conductor.getInstance().sendMessage("You must provide at least one entry before pressing \"Done.\"", channel, delay);
