@@ -41,6 +41,7 @@ public class ButtonPress extends ListenerAdapter {
             Conductor.getInstance().getJDA().getGuilds().get(0).removeRoleFromMember(Conductor.getInstance().getJDA().getUserById(discordID),
                     Conductor.getInstance().getRole(Strings.DJ_APPLICATION_ROLE, Conductor.SearchType.ID)).queue();
             JsonFile file = new JsonFile("applications", "./");
+            file.createFile();
             file.set(discordID, null);
             try {
                 file.save();
